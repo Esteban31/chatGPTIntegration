@@ -1,0 +1,8 @@
+{
+  "version": 2,
+  "builds": [{ "src": "nest build", "use": "@vercel/node" }],
+  "routes": [{ "src": "/(.*)", "dest": "nest build/server/main.js" }],
+  "public": {
+    "output": "dist"
+  }
+}
