@@ -1,4 +1,4 @@
-import { Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, Res } from '@nestjs/common';
 import { DiagnosticReturn } from './dto/diagnostic-return';
 
 import { Configuration, OpenAIApi } from 'openai';
@@ -6,9 +6,10 @@ import { Configuration, OpenAIApi } from 'openai';
 @Controller('diagnostics')
 export class DiagnosticsController {
   @Post()
-  async getDiagnostics(): Promise<any> {
+  async getDiagnostics(@Body() prompt: string): Promise<any> {
+    // Asssign default config message
     const request =
-      'Según el enunciado anterior, proporciona información en tercera persona somo si fueras un doctor y que la información esté de forma separada sobre la enfermedad actual, el motivo de la consulta, examen físico, impresión y plan de mejora ';
+      'Según la conversación anterior, retorname un JSON de un resumen MUY completo en terminos médicos entendibles,  separado por las siguientes categorías, tal cual están escritas, Enfermedad actual, motivo de consulta, examen fisico, impresion, plan de mejora ';
 
     const configuration = new Configuration({
       organization: '',
@@ -18,21 +19,34 @@ export class DiagnosticsController {
     const openai = new OpenAIApi(configuration);
     const response = await openai.createCompletion({
       model: 'text-davinci-003',
-      prompt:
-        'Tengo dolor de cabeza y como un pinchazo en el estómago, he estado tomando acetaminofén para el dolor, pero no se me baja ' +
-        request,
-      max_tokens: 200,
+      prompt: prompt + request,
+      max_tokens: 500,
       temperature: 0.9,
     });
 
-    console.log(response?.data.choices[0].text);
+    // const text = response?.data.choices[0].text;
 
-    return {
-      currentIssue: '',
-      originDate: '',
-      phisicTest: '',
-      impresion: '',
-      actionPlan: '',
-    };
+    // const lines = text.split('\n');
+
+    // Objeto donde almacenaremos las categorías
+    // const resultInfo = {};
+
+    // Recorrer cada línea y extraer las categorías y sus valores
+    // lines.forEach((line) => {
+    //   const index = line.indexOf(': ');
+    //   if (index !== -1) {
+    //     const category = line.slice(0, index).trim();
+    //     const value = line.slice(index + 2).trim();
+    //     resultInfo[category] = value;
+    //   }
+    // });
+
+    // console.log(response?.data.choices[0].text);
+
+    // console.log(JSON.parse(response?.data.choices[0].text));
+
+    // Convertir el objeto en formato JSON
+
+    return JSON.parse(response?.data.choices[0].text);
   }
 }
